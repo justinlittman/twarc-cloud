@@ -105,7 +105,13 @@ venv.bak/
 
 .idea/
 
+# Terraform
+terraform/terraform.tfstate*
+terraform/terraform.tfvars
+terraform/.terraform
+
 download/
 output/
 temp/
 collections/
+twarc_cloud.ini

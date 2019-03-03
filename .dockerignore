@@ -1,0 +1,7 @@
+download/
+ENV/
+output/
+temp/
+collections/
+terraform/
+twarc_cloud.ini

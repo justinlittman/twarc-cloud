@@ -1,0 +1,2 @@
+class TwarcCloudException(Exception):
+    pass

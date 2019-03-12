@@ -1,5 +1,8 @@
 # twarc-cloud
 [![CircleCI](https://circleci.com/gh/justinlittman/twarc-cloud.svg?style=svg)](https://circleci.com/gh/justinlittman/twarc-cloud)
+[![Documentation Status](https://readthedocs.org/projects/twarc-cloud/badge/?version=latest)](https://twarc-cloud.readthedocs.io/en/latest/?badge=latest)
+
+Docs: [http://twarc-cloud.readthedocs.io/](http://twarc-cloud.readthedocs.io/)
 
 An AWS-friendly wrapper for Twarc for collecting Twitter data from Twitter's API.
 

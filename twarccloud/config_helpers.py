@@ -15,14 +15,15 @@ AwsConfiguration = namedtuple('AwsConfiguration',
 
 def setup_logging(debug=False):
     logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
-    logging.getLogger("requests").setLevel(logging.INFO)
-    logging.getLogger("requests_oauthlib").setLevel(logging.INFO)
-    logging.getLogger("oauthlib").setLevel(logging.INFO)
-    logging.getLogger("urllib3").setLevel(logging.INFO)
-    logging.getLogger("botocore").setLevel(logging.INFO)
-    logging.getLogger("botocore.credentials").setLevel(logging.ERROR)
+    logging.getLogger('requests').setLevel(logging.INFO)
+    logging.getLogger('requests_oauthlib').setLevel(logging.INFO)
+    logging.getLogger('oauthlib').setLevel(logging.INFO)
+    logging.getLogger('urllib3').setLevel(logging.INFO)
+    logging.getLogger('botocore').setLevel(logging.INFO)
+    logging.getLogger('botocore.credentials').setLevel(logging.WARNING)
     logging.getLogger('s3transfer').setLevel(logging.INFO)
     logging.getLogger('boto3').setLevel(logging.INFO)
+    logging.getLogger('twarc').setLevel(logging.WARNING)
 
 
 def setup_honeybadger():

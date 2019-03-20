@@ -49,7 +49,9 @@ class CollectionLock:
 
 
 class LockedException(Exception):
-    pass
+    def __init__(self):
+        Exception.__init__(self, 'Collection is locked. This is because a harvest is currently running or a harvest ' \
+                                 'terminated uncleanly.')
 
 
 # Returns True if lock file exists at the provided filepath.

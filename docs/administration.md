@@ -4,7 +4,12 @@
 To prevent multiple harvests being performed concurrently for a collection, a lock file (`lock.json`) is written to a
 collection's base directory during a harvest. Harvesters check to see if the lock file is present before beginning.
 
-If a harvest fails, it is possible that the lock file is not removed. To force it to be removed, you can delete `lock.json`
+If a harvest raises a `LockedException` this indicates that a harvest is currently in process or a previous harvest
+exited uncleanly.
+
+If a collection is locked because multiple harvests are attempting to run concurrently then adjust the schedule.
+
+If a collection is locked because a previous harvest exited uncleanly, then force it be unlocked. To unlock, delete `lock.json`
 or execute `tweet_harvester`'s `aws unlock` command. For example:
 
         $ python3 tweet_harvester.py aws unlock twarc_cloud test_collection

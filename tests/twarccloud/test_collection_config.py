@@ -1,6 +1,5 @@
-from unittest import TestCase
+from tests import TestCase, timeline_config, search_config, filter_config, extract_dict
 from twarccloud.collection_config import CollectionConfigException, Changeset
-from . import *
 
 
 class TestInvalidReasons(TestCase):
@@ -123,10 +122,10 @@ class TestDiff(TestCase):
                 }
             },
             'delete': [{
-                    'users': ['6253282', {
-                        '12': ['since_id']
-                    }]
+                'users': ['6253282', {
+                    '12': ['since_id']
                 }]
+            }]
         })
 
 
@@ -144,38 +143,38 @@ class TestMerge(TestCase):
     def test_merged_key(self):
         self.assert_timeline_config['keys']['consumer_key'] = 'foo'
         self.changeset['update'] = {
-                'keys': {
-                    'consumer_key': 'foo'
-                }
+            'keys': {
+                'consumer_key': 'foo'
             }
+        }
         self.timeline_config.merge_changeset(self.changeset)
         self.assertDictEqual(self.assert_timeline_config, self.timeline_config)
 
     def test_merged_timeline(self):
         self.assert_timeline_config['users']['2244994945'] = {
-                        'screen_name': 'twitterdev',
-                        'since_id': '56789'
-                    }
+            'screen_name': 'twitterdev',
+            'since_id': '56789'
+        }
         self.assert_timeline_config['users']['481186914']['screen_name'] = 'real_justin_littman'
         del self.assert_timeline_config['users']['6253282']
         del self.assert_timeline_config['users']['12']['since_id']
 
         self.changeset['update'] = {
-                'users': {
-                    '2244994945': {
-                        'screen_name': 'twitterdev',
-                        'since_id': '56789'
-                    },
-                    '481186914': {
-                        'screen_name': 'real_justin_littman'
-                    }
+            'users': {
+                '2244994945': {
+                    'screen_name': 'twitterdev',
+                    'since_id': '56789'
+                },
+                '481186914': {
+                    'screen_name': 'real_justin_littman'
                 }
+            }
         }
         self.changeset['delete'] = [{
-                    'users': ['6253282', {
-                        '12': ['since_id']
-                    }]
-                }]
+            'users': ['6253282', {
+                '12': ['since_id']
+            }]
+        }]
 
         self.timeline_config.merge_changeset(self.changeset)
         self.assertDictEqual(self.assert_timeline_config, self.timeline_config)
@@ -185,13 +184,13 @@ class TestMerge(TestCase):
         del self.assert_filter_config['filter']['track']
 
         self.changeset['update'] = {
-                'filter': {
-                    'follow': '123'
-                }
+            'filter': {
+                'follow': '123'
             }
+        }
         self.changeset['delete'] = [
             {'filter': ['track']
-         }]
+             }]
 
         self.filter_config.merge_changeset(self.changeset)
         self.assertDictEqual(self.assert_filter_config, self.filter_config)

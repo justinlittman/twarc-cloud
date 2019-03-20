@@ -19,7 +19,6 @@ class S3FileMoverThread(threading.Thread):
         self.collections_path = collections_path
         self.bucket = bucket
         self.stop_event = threading.Event()
-        self.s3_client = aws_client('s3')
         self.exception = None
         threading.Thread.__init__(self)
 
@@ -45,12 +44,12 @@ class S3FileMoverThread(threading.Thread):
         dest_filepath = src_file.filepath.replace(self.collections_path, DEFAULT_COLLECTIONS_PATH)
         if isinstance(src_file, AddFile):
             log.debug('Copying %s to s3://%s/%s', src_file.filepath, self.bucket, dest_filepath)
-            self.s3_client.upload_file(src_file.filepath, self.bucket, dest_filepath)
+            aws_client('s3').upload_file(src_file.filepath, self.bucket, dest_filepath)
             if src_file.delete:
                 os.remove(src_file.filepath)
         else:
             log.debug('Deleting s3://%s/%s', self.bucket, dest_filepath)
-            self.s3_client.delete_object(Bucket=self.bucket, Key=dest_filepath)
+            aws_client('s3').delete_object(Bucket=self.bucket, Key=dest_filepath)
 
     def stop(self):
         self.stop_event.set()

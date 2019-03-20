@@ -10,17 +10,17 @@ from twarccloud import log
 
 # Provides locking for a collection by placing and removing lock.json in the root of the collection.
 class CollectionLock:
-    def __init__(self, collections_path, collection_id, file_queue, collect_timestamp=None):
+    def __init__(self, collections_path, collection_id, file_queue, harvest_timestamp=None):
         self.lock_filepath = get_lock_file(collection_id, collections_path=collections_path)
         self.last_harvest_filepath = get_last_harvest_file(collection_id, collections_path=collections_path)
-        self.collect_timestamp = collect_timestamp
+        self.harvest_timestamp = harvest_timestamp
         self.file_queue = file_queue
 
     # Lock the collection.
     def lock(self):
         log.debug('Locking')
         lock = {
-            'harvest_id': self.collect_timestamp.isoformat()
+            'harvest_id': self.harvest_timestamp.isoformat()
         }
         with FileQueueingWriter(self.lock_filepath, self.file_queue) as lock_writer:
             lock_writer.write_json(lock, indent=2)

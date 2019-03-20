@@ -69,8 +69,10 @@ def setup_aws_keys(ini_config):
             'Access key and/or secret key missing from twarc_cloud.ini. Maybe you used a different key '
             'configuration mechanism?')
 
+
 def bucket_value(args, ini_config):
     return _config_value('bucket', args, ini_config)
+
 
 def _config_value(key, args, ini_config):
     args_dict = vars(args)

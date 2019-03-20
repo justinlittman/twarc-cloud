@@ -38,7 +38,7 @@ pip install pylint
 then:
 ```
 python -m unittest discover
-pylint *.py twarccloud
+pylint *.py twarccloud tests
 
 ```
 

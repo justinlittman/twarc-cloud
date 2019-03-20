@@ -10,8 +10,8 @@ import copy
 import dateutil.parser
 from twarccloud.harvester.server_thread import ServerThread
 from twarccloud.harvester.twarc_thread import TwarcThread
-from twarccloud.filepaths_helper import get_harvest_path, get_lock_file, get_collection_config_filepath, \
-    get_harvest_info_file, get_changeset_file
+from twarccloud.filepaths_helper import get_lock_file, get_collection_config_filepath, \
+    get_harvest_info_file, get_changeset_file, get_harvest_file
 from twarccloud.harvester.file_mover_thread import S3FileMoverThread
 from twarccloud.harvester.collection_lock import CollectionLock, assert_locked
 from twarccloud.aws.aws_helper import sync_collection_config, sync_collection_config_file
@@ -25,17 +25,18 @@ from twarccloud.config_helpers import setup_logging, setup_honeybadger, load_ini
 from twarccloud import log, __version__
 
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes, too-few-public-methods
 class TweetHarvester:
     # pylint: disable=too-many-arguments
     def __init__(self, collection_id, collections_path, bucket=None, tweets_per_file=None, monitor=False,
-                 shutdown=False):
+                 shutdown=False, port=80):
         self.harvest_timestamp = datetime.utcnow()
         self.collection_id = collection_id
         self.collections_path = collections_path
         self.bucket = bucket
         self.tweets_per_file = tweets_per_file
         self.monitor = monitor
+        self.port = port
 
         # When running in AWS as a service:
         # 1. twarc_cloud calls /stop, which sets stop_event.
@@ -78,10 +79,10 @@ class TweetHarvester:
             sync_collection_config(self.collections_path, self.collection_id, self.bucket)
 
         # Check if collection is locked
-        assert_locked(self.lock_filepath())
+        assert_locked(get_lock_file(self.collection_id, collections_path=self.collections_path))
 
         # Start the server
-        ServerThread(self.stop_event, self.stopped_event, self.shutdown_event, self.harvest_info).start()
+        ServerThread(self.stop_event, self.stopped_event, self.shutdown_event, self.harvest_info, self.port).start()
 
         # Start the monitor
         if self.monitor:
@@ -91,7 +92,7 @@ class TweetHarvester:
         collection_config = self._load_collection_config()
 
         with S3FileMoverThread(self.file_queue, self.collections_path, self.bucket), CollectionLock(
-                self.collections_path, self.collection_id, self.file_queue, collect_timestamp=self.harvest_timestamp):
+                self.collections_path, self.collection_id, self.file_queue, harvest_timestamp=self.harvest_timestamp):
             # Write the collection config file to harvester
             self._write_harvest_collection_config(collection_config)
 
@@ -153,9 +154,8 @@ class TweetHarvester:
             return CollectionConfig(json.load(config_file))
 
     def _write_harvest_collection_config(self, collection_config):
-        harvest_collection_config_filepath = os.path.join(
-            get_harvest_path(self.collection_id, self.harvest_timestamp, collections_path=self.collections_path),
-            'collection.json')
+        harvest_collection_config_filepath = get_harvest_file(self.collection_id, self.harvest_timestamp,
+                                                              'collection.json', collections_path=self.collections_path)
         os.makedirs(os.path.dirname(harvest_collection_config_filepath), exist_ok=True)
         # Remove secrets
         clean_config = copy.deepcopy(collection_config)
@@ -164,8 +164,6 @@ class TweetHarvester:
         with FileQueueingWriter(harvest_collection_config_filepath, self.file_queue) as config_writer:
             config_writer.write_json(clean_config, indent=2)
 
-    def lock_filepath(self):
-        return get_lock_file(self.collection_id, collections_path=self.collections_path)
 
 def add_local_subparser(subparsers):
     local_parser = subparsers.add_parser('local', help='Collect in local mode.')

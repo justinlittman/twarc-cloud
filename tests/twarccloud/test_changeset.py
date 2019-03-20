@@ -1,6 +1,5 @@
-from unittest import TestCase
+from tests import TestCase, timeline_config, extract_dict
 from twarccloud.collection_config import Changeset
-from . import *
 
 
 class TestChangeSet(TestCase):
@@ -24,15 +23,15 @@ class TestChangeSet(TestCase):
 
     def test_clean(self):
         self.changeset['update'] = {
-                'users': {
-                    '6253282': {
-                        'since_id': '56789'
-                    },
-                    '12345': {
-                        'screen_name': 'foo'
-                    }
+            'users': {
+                '6253282': {
+                    'since_id': '56789'
+                },
+                '12345': {
+                    'screen_name': 'foo'
                 }
             }
+        }
         self.changeset.clean_changeset(timeline_config())
         self.assertDictEqual(extract_dict(self.changeset), {
             'update': {
@@ -46,12 +45,12 @@ class TestChangeSet(TestCase):
         })
 
     def test_clean_no_users(self):
-        self.changeset['update'] =  {
-                'users': {
-                    '12345': {
-                        'screen_name': 'foo'
-                    }
+        self.changeset['update'] = {
+            'users': {
+                '12345': {
+                    'screen_name': 'foo'
                 }
             }
+        }
         self.changeset.clean_changeset(timeline_config())
         self.assertFalse(self.changeset['update'])

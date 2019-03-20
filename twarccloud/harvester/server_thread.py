@@ -43,14 +43,16 @@ def shutdown():
 
 
 # Thread that runs this Flask application.
+# pylint: disable=too-many-arguments
 class ServerThread(threading.Thread):
-    def __init__(self, stop_event, stopped_event, shutdown_event, harvest_info):
+    def __init__(self, stop_event, stopped_event, shutdown_event, harvest_info, port):
         threading.Thread.__init__(self)
         self.daemon = True
+        self.port = port
         app.config['stop_event'] = stop_event
         app.config['stopped_event'] = stopped_event
         app.config['shutdown_event'] = shutdown_event
         app.config['harvest_info'] = harvest_info
 
     def run(self):
-        app.run(host='0.0.0.0', port=80, debug=False)
+        app.run(host='0.0.0.0', port=self.port, debug=False)

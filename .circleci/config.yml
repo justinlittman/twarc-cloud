@@ -43,7 +43,7 @@ jobs:
           name: run pylint
           command: |
             . venv/bin/activate
-            pylint *.py twarccloud
+            pylint *.py twarccloud tests
 
       - store_artifacts:
           path: test-reports

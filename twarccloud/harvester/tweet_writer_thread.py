@@ -49,12 +49,13 @@ class TweetWriterThread(Thread):
         self.join()
 
     def write(self, tweet):
+        if self.tweet_count == self.tweets_per_file:
+            log.debug('Rolling over because tweet count is %s', self.tweet_count)
+            self._new_file()
         with self.file_lock:
             self.file.write('{}\n'.format(json.dumps(tweet)).encode('utf-8'))
         self.tweet_count += 1
         self.harvest_info.tweets.incr()
-        if self.tweet_count == self.tweets_per_file:
-            self._new_file()
 
     def _new_file(self):
         with self.file_lock:
@@ -73,9 +74,10 @@ class TweetWriterThread(Thread):
         if self.timer:
             self.timer.cancel()
         if self.file:
+            log.debug('Closing %s', self.filepath)
+            self.file.close()
             self.harvest_info.files.incr()
             self.harvest_info.file_bytes.incr(os.path.getsize(self.filepath))
-            self.file.close()
             self._add_to_manifest()
             log.debug('Adding %s to file queue', self.filepath)
             self.file_queue.put(AddFile(self.filepath, True))
@@ -86,9 +88,12 @@ class TweetWriterThread(Thread):
             datetime.utcnow().strftime('%Y%m%d%H%M%S'))
 
     def _add_to_manifest(self):
-        with FileQueueingWriter(get_harvest_manifest_filepath(self.collection_id, self.harvest_timestamp),
+        log.debug('Adding %s to manifest', self.filepath)
+        with FileQueueingWriter(get_harvest_manifest_filepath(self.collection_id, self.harvest_timestamp,
+                                                              collections_path=self.collections_path),
                                 self.file_queue, mode='a') as writer:
             writer.write('{}  {}\n'.format(self._sha1(), os.path.basename(self.filepath)))
 
     def _sha1(self):
-        return hashlib.sha1(open(self.filepath, 'rb').read()).hexdigest()
+        with open(self.filepath, 'rb') as file:
+            return hashlib.sha1(file.read()).hexdigest()
